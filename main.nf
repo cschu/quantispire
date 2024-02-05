@@ -52,9 +52,9 @@ workflow {
 			return tuple(file.name.replaceAll(/-assembled\.fa\.gz$/, ""), file)
 		}
 
-	minimap2_index(assembly_ch)
+	// minimap2_index(assembly_ch)
 
-	gq_resources_ch = minimap2_index.out.index
+	gq_resources_ch = assembly_ch
 		.join(gff_ch, by: 0)
 		.join(emapper_ch, by: 0)
 	gq_resources_ch.dump(pretty: true, tag: "gq_resources_ch")
