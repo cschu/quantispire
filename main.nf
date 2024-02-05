@@ -7,6 +7,12 @@ include { gffquant_flow } from "./nevermore/workflows/gffquant"
 include { fastq_input } from "./nevermore/workflows/input"
 
 include { minimap2_index } from "./nevermore/modules/align/index"
+include { stream_gffquant_genome } from "./nevermore/modules/profilers/gffquant_genome"
+
+include { collate_feature_counts } from "./nevermore/modules/profilers/gffquant"
+
+params.gq_collate_columns = "uniq_scaled,combined_scaled"
+
 
 if (params.input_dir && params.remote_input_dir) {
 	log.info """
@@ -64,26 +70,35 @@ workflow {
 
 	nevermore_main(fastq_ch)
 
-	if (params.run_gffquant) {
-
-		if (params.gq_stream) {
-			gq_input_ch = nevermore_main.out.fastqs
-				.map { sample, fastqs ->
-				sample_id = sample.id.replaceAll(/.(orphans|singles|chimeras)$/, "")
-				return tuple(sample_id, [fastqs].flatten())
-			}
-			.groupTuple()
-			.map { sample_id, fastqs -> return tuple(sample_id, [fastqs].flatten()) }
-			gq_input_ch.view()
-
-		} else {
-
-			gq_input_ch = nevermore_main.out.alignments
-
+	gq_input_ch = nevermore_main.out.fastqs
+		.map { sample, fastqs ->
+			sample_id = sample.id.replaceAll(/.(orphans|singles|chimeras)$/, "")
+			return tuple(sample_id, [fastqs].flatten())
 		}
+		.groupTuple()
+		.map { sample_id, fastqs -> return tuple(sample_id, [fastqs].flatten()) }
+		.join(gq_resources_ch, by: 0)
+	
+	stream_gffquant_genome(gq_input_ch)
+	feature_count_ch = stream_gffquant_genome.out.results
+	
+	feature_count_ch = feature_count_ch
+		.map { sample, files -> return files }
+		.flatten()
+		.filter { !it.name.endsWith("Counter.txt.gz") }
+		.filter { params.collate_gene_counts || !it.name.endsWith("gene_counts.txt.gz") }
+		.map { file -> 
+			def category = file.name
+				.replaceAll(/\.txt\.gz$/, "")
+				.replaceAll(/.+\./, "")
+			return tuple(category, file)
+		}
+		.groupTuple(sort: true)
+		.combine(
+			Channel.from(params.gq_collate_columns.split(","))
+		)
 
-		gffquant_flow(gq_input_ch)		
-
-	}
+	collate_feature_counts(feature_count_ch)
+	
 
 }
