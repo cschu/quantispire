@@ -39,7 +39,7 @@ workflow {
 	// /g/scb2/bork/data/MAGs/annotations/Larkin_2021_GO-SHIP_marine/psa_megahit/eggnog-mapper/SAMN15782773/SAMN15782773.emapper.annotations.gz
 	emapper_ch = Channel.fromPath(params.annotation_dir + "/" + params.study + "/psa_megahit/eggnog-mapper/**.emapper.annotations.gz")
 		.map { file ->
-			return tuple(file.name.replaceAll(/\.emapper_annotations.gz$/, ""), file)
+			return tuple(file.name.replaceAll(/\.emapper.annotations.gz$/, ""), file)
 		}
 	emapper_ch.dump(pretty: true, tag: "emapper_ch")
 	// /g/scb2/bork/data/MAGs/annotations/Larkin_2021_GO-SHIP_marine/psa_megahit/prodigal/SAMN15782773.psa_megahit.prodigal.gff.gz
