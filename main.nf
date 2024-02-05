@@ -45,7 +45,7 @@ workflow {
 	// /g/scb2/bork/data/MAGs/annotations/Larkin_2021_GO-SHIP_marine/psa_megahit/prodigal/SAMN15782773.psa_megahit.prodigal.gff.gz
 	gff_ch = Channel.fromPath(params.annotation_dir + "/" + params.study + "/psa_megahit/prodigal/**.psa_megahit.prodigal.gff.gz")
 		.map { file ->
-			return tuple(file.name.replaceAll(/\.prodigal\.gff\.gz$/, ""), file)
+			return tuple(file.name.replaceAll(/\.psa_megahit\.prodigal\.gff\.gz$/, ""), file)
 		}
 	gff_ch.dump(pretty: true, tag: "gff_ch")
 	// /g/scb2/bork/data/MAGs/Larkin_2021_GO-SHIP_marine/psa_megahit/assemblies/SAMN15782773-assembled.fa.gz
