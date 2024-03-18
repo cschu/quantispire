@@ -7,6 +7,8 @@ process stream_gffquant_genome {
 	output:
 		tuple val(sample), path("profiles/${sample}/*.txt.gz"), emit: results
 		tuple val(sample), path("logs/${sample}.log")
+		tuple val(sample), path("profiles/${sample}/*.pd.txt"), emit: profiles
+		tuple val(sample), path("profiles/${sample}/*.coverage.txt"), emit: coverage_profiles
 
 	script:
 			def gq_output = "-o profiles/${sample}/${sample}"
@@ -18,6 +20,8 @@ process stream_gffquant_genome {
 			gq_params += (params.gq_restrict_metrics) ? " --restrict_metrics ${params.gq_restrict_metrics}" : ""
 			gq_params += (params.gq_keep_alignments) ? " --keep_alignment_file ${sample}.sam" : ""
 			gq_params += (params.gq_unmarked_orphans) ? " --unmarked_orphans" : ""
+			gq_params += (params.gq_with_coverage) ? " --with_coverage" : ""
+
 
 			gq_params += " -t ${task.cpus}"
 
