@@ -108,7 +108,7 @@ workflow {
 		.flatten()
 		.map { file ->
 			def category = file.name
-				.replaceAll(/\.coverage.txt$/, "")
+				.replaceAll(/\.coverage\.txt$/, "")
 				.replaceAll(/.+\./, "")
 			return tuple(category, file)
 		}
@@ -117,7 +117,7 @@ workflow {
 			Channel.from(params.gq_collate_coverage_columns.split(","))
 		)
 
-		collate_coverage(coverage_ch, params.gq_collate_suffix)
+		collate_coverage(coverage_ch, ".coverage.txt")
 
 
 
