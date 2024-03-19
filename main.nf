@@ -13,6 +13,7 @@ include { collate_feature_counts; collate_feature_counts as collate_coverage } f
 
 params.gq_collate_columns = "uniq_scaled,combined_scaled"
 params.gq_collate_coverage_columns = "uniq_depth,combined_depth"
+params.gq_collate_suffix = ".txt"
 
 if (params.input_dir && params.remote_input_dir) {
 	log.info """
@@ -100,7 +101,7 @@ workflow {
 			Channel.from(params.gq_collate_columns.split(","))
 		)
 
-	collate_feature_counts(feature_count_ch)
+	collate_feature_counts(feature_count_ch, params.gq_collate_suffix)
 	
 	coverage_ch = stream_gffquant_genome.out.coverage_profiles
 		.map { sample, files -> return files }
@@ -116,7 +117,7 @@ workflow {
 			Channel.from(params.gq_collate_coverage_columns.split(","))
 		)
 
-		collate_coverage(coverage_ch)
+		collate_coverage(coverage_ch, params.gq_collate_suffix)
 
 
 
