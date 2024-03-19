@@ -101,7 +101,7 @@ workflow {
 			Channel.from(params.gq_collate_columns.split(","))
 		)
 
-	collate_feature_counts(feature_count_ch, params.gq_collate_suffix)
+	collate_feature_counts(feature_count_ch, ".pd.txt")
 	
 	coverage_ch = stream_gffquant_genome.out.coverage_profiles
 		.map { sample, files -> return files }
