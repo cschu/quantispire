@@ -81,6 +81,7 @@ workflow {
 	
 	stream_gffquant_genome(gq_input_ch)
 	feature_count_ch = stream_gffquant_genome.out.results
+		.concat(stream_gffquant_genome.out.profiles)
 	
 	feature_count_ch = feature_count_ch
 		.map { sample, files -> return files }
