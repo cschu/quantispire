@@ -8,7 +8,7 @@ process stream_gffquant_genome {
 		tuple val(sample), path("profiles/${sample}/*.txt.gz"), emit: results
 		tuple val(sample), path("logs/${sample}.log")
 		tuple val(sample), path("profiles/${sample}/*.pd.txt"), emit: profiles
-		tuple val(sample), path("profiles/${sample}/*.coverage.txt"), emit: coverage_profiles
+		tuple val(sample), path("profiles/${sample}/*.coverage.txt"), emit: coverage_profiles, optional: !params.gq_with_coverage
 
 	script:
 			def gq_output = "-o profiles/${sample}/${sample}"
