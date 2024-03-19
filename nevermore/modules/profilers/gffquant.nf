@@ -135,6 +135,7 @@ process run_gffquant {
 params.gq_collate_columns = "uniq_scaled,combined_scaled"
 
 process collate_feature_counts {
+	label "collate_profiles"
 
 	input:
 	tuple val(sample), path(count_tables), val(column)

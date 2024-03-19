@@ -9,10 +9,10 @@ include { fastq_input } from "./nevermore/workflows/input"
 include { minimap2_index } from "./nevermore/modules/align/index"
 include { stream_gffquant_genome } from "./nevermore/modules/profilers/gffquant_genome"
 
-include { collate_feature_counts } from "./nevermore/modules/profilers/gffquant"
+include { collate_feature_counts; collate_feature_counts as collate_coverage } from "./nevermore/modules/profilers/gffquant"
 
 params.gq_collate_columns = "uniq_scaled,combined_scaled"
-
+params.gq_collate_coverage_columns = "uniq_depth,combined_depth"
 
 if (params.input_dir && params.remote_input_dir) {
 	log.info """
@@ -89,7 +89,8 @@ workflow {
 		.filter { params.collate_gene_counts || !it.name.endsWith("gene_counts.txt.gz") }
 		.map { file -> 
 			def category = file.name
-				.replaceAll(/\.txt\.gz$/, "")
+				// .replaceAll(/\.txt(\.gz)?$/, "")
+				.replaceAll(/\.pd\.txt$/, "")
 				.replaceAll(/.+\./, "")
 			return tuple(category, file)
 		}
@@ -100,5 +101,22 @@ workflow {
 
 	collate_feature_counts(feature_count_ch)
 	
+	coverage_ch = stream_gffquant_genome.out.coverage_profiles
+		.map { sample, files -> return files }
+		.flatten()
+		.map { file ->
+			def category = file.name
+				.replaceAll(/\.coverage.txt$/, "")
+				.replaceAll(/.+\./, "")
+			return tuple(category, file)
+		}
+		.groupTuple(sort: true)
+		.combine(
+			Channel.from(params.gq_collate_coverage_columns.split(","))
+		)
+
+		collate_coverage(coverage_ch)
+
+
 
 }
